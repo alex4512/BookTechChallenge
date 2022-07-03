@@ -1,7 +1,36 @@
 spring:
   profiles:
     - dev
+#  datasource:
+#    url: jdbc:h2:mem:BOOKCHALLENGE
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
+
+#  spring.jpa.database-platform=com.springboot.sqlite.SQLDialect
+#  spring.jpa.hibernate.ddl-auto=update
+#
+#
+#  spring.datasource.url = jdbc:sqlite:sqlitesample.db
+#  spring.datasource.driver-class-name = org.sqlite.JDBC
+#
+#  spring.datasource.username = admin
+#  spring.datasource.password = admin
+  jpa:
+    show-sql: true
+    database-platform: alexarg4512.BookTechChallenge.v1.config.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:sqlite:bookchallenge.db
+    driver-class-name: org.sqlite.JDBC
+    username: admin
+    password: admin
 server:
   port: 8080
   servlet:
@@ -9,11 +38,10 @@ server:
 
 logging:
   level:
-    root: trace
-
+    root: info
 ---
 
 gutendex:
   baseUrl: https://gutendex.com/books
   searchUrl: ?search=
-
+  idsUrl: ?ids=
