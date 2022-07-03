@@ -1,6 +1,8 @@
 package alexarg4512.BookTechChallenge.v1.service;
 
+import alexarg4512.BookTechChallenge.v1.entity.Book;
 import alexarg4512.BookTechChallenge.v1.entity.GutendexResponseEntity;
+import alexarg4512.BookTechChallenge.v1.exception.BookNotFoundException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,6 +31,9 @@ public class GutendexServiceClientImpl implements BookService {
 
     @Value("${gutendex.baseUrl}")
     private String baseUrl;
+
+    @Value("${gutendex.idsUrl}")
+    String idsUrl;
 
     @Value("${gutendex.searchUrl}")
     String searchUrl;
@@ -50,8 +54,16 @@ public class GutendexServiceClientImpl implements BookService {
     }
 
     @Override
-    public List findOne(String name) {
-        return null;
+    public ResponseEntity findById(Long id) {
+
+        GutendexResponseEntity gutendexResponseEntity = restTemplate.getForObject(baseUrl+idsUrl+id, GutendexResponseEntity.class, params);
+        LOGGER.info("List size : " + gutendexResponseEntity.getResults().size());
+        if(gutendexResponseEntity!=null && gutendexResponseEntity.getCount()==1)
+        {
+            return new ResponseEntity<Book>(gutendexResponseEntity.getResults().iterator().next(), HttpStatus.OK);
+        } else {
+            throw new BookNotFoundException("Book with id " + id + " not found. Cannot add review");
+        }
     }
 
     @Override

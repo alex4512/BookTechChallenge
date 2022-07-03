@@ -63,6 +63,17 @@ public class Book implements Serializable {
         this.authors = authors;
     }
 
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", downladCount=" + downladCount +
+                ", languages=" + languages +
+                ", authors=" + authors +
+                '}';
+    }
+
     /*{
   "id": <number of Project Gutenberg ID>,
   "title": <string>,

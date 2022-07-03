@@ -57,8 +57,4 @@ public class GutendexResponseEntity {
     }
 
 
-    //     "count": <number>,
-//            "next": <string or null>,
-//            "previous": <string or null>,
-//            "results": <array of Books>
 }

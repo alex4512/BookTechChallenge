@@ -1,11 +1,12 @@
 package alexarg4512.BookTechChallenge;
 
 import alexarg4512.BookTechChallenge.v1.controller.BookController;
+import alexarg4512.BookTechChallenge.v1.entity.Book;
 import alexarg4512.BookTechChallenge.v1.entity.GutendexResponseEntity;
+import alexarg4512.BookTechChallenge.v1.entity.Review;
 import alexarg4512.BookTechChallenge.v1.service.GutendexServiceClientImpl;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import alexarg4512.BookTechChallenge.v1.service.ReviewService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookTechChallengeApplicationTests {
 
     /*controllers, services, data repository components*/
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BookTechChallengeApplicationTests.class);
 
     @Autowired
@@ -41,6 +43,9 @@ class BookTechChallengeApplicationTests {
     @Autowired
     BookController bookController;
 
+    @Autowired
+    ReviewService reviewService;
+
 
     @Value("${gutendex.baseUrl}")
     private String baseUrl;
@@ -48,14 +53,29 @@ class BookTechChallengeApplicationTests {
     @Value("${gutendex.searchUrl}")
     String searchUrl;
 
+
+    @Value("${gutendex.idsUrl}")
+    String idsUrl;
+
+
+    static Review reviewInvalidPayload;
+    static Review reviewBookNotFound;
+    static Review reviewValidPayloadBookExists;
     static Map<String, String> params = new HashMap<>();
 
 
-    static {
+
+
+    @BeforeAll
+    public static void instantiateObjects() {
         params.put("Accept", "*/*");
         params.put("Content-Type", "application/json");
-    }
 
+        reviewInvalidPayload = new Review(1342L, 14L, "Excellent, but only 1-5 values allowed for rating");
+        reviewValidPayloadBookExists = new Review(68283L, 4L, "might be good, wouldn't know");
+        reviewBookNotFound = new Review(-1L, 5L, "amazing, would read it again");
+
+    }
 
     @Test
     void testApiAvailable() {
@@ -85,15 +105,21 @@ class BookTechChallengeApplicationTests {
 
     }
 
-
     @Test
-    void testControllerFindByNameOfLove() {
+    void testControllerFindByNameOfLoveStatusAndResponseBody() {
         LOGGER.info("BookTechChallengeApplicationTests:testGutendexServiceFindByNameOfLove  - start");
         ResponseEntity response = this.bookController.findByName("Love");
         GutendexResponseEntity responseEntity = (GutendexResponseEntity) response.getBody();
         LOGGER.debug("count : " + responseEntity.getCount());
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertEquals(responseEntity.getCount(), 566);
+        boolean isCthuluEverywhere = responseEntity.getResults().stream()
+                .map(Book::getTitle)
+                .filter(name->name.contains("Cthulhu"))
+                .peek(LOGGER::info)
+                .findAny()
+                .isPresent();
+        assertEquals(isCthuluEverywhere, true);
         LOGGER.info("BookTechChallengeApplicationTests:testGutendexServiceFindByNameOfLove - done");
     }
 
@@ -123,10 +149,51 @@ class BookTechChallengeApplicationTests {
                         restTemplate.getForObject("http://localhost:8080/v1/books/byName", GutendexResponseEntity.class, params));
 
         assertEquals(e.getStatusCode(), HttpStatus.BAD_REQUEST);
-
         LOGGER.info("BookTechChallengeApplicationTests:test400ErrorStatus - done");
     }
 
+    @Test
+    void testFindOneById(){
+        LOGGER.info("BookTechChallengeApplicationTests:testFindOneById  - start");
+        ResponseEntity response = gutendexService.findById(68283L);
+        GutendexResponseEntity responseEntity = (GutendexResponseEntity) response.getBody();
+        LOGGER.info("count : " + responseEntity.getCount());
+        LOGGER.info("body : " + responseEntity.getResults().toString());
+        assertEquals(responseEntity.getCount(), 1);
+        LOGGER.info("BookTechChallengeApplicationTests:testFindOneById  - done");
+    }
+
+    @Test
+    void testAddReviewForBookThatExist() {
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatExist  - start");
+        ResponseEntity response = reviewService.addReview(reviewValidPayloadBookExists);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatExist  - done");
+    }
+
+    @Test
+    void testAddReviewForBookThatDoesNotexist() {
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - start");
+        ResponseEntity response = reviewService.addReview(reviewBookNotFound);
+
+        HttpClientErrorException e = assertThrows(HttpClientErrorException.class,
+                () -> restTemplate.postForEntity("http://localhost:8080/v1/reviews",
+                                reviewBookNotFound, Review.class));
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - done");
+    }
+
+    @Test
+    void testAddReviewWithInvalidPaylod() {
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - start");
+
+        HttpClientErrorException e = assertThrows(HttpClientErrorException.class,
+                () -> restTemplate.postForEntity("http://localhost:8080/v1/reviews",
+                                reviewInvalidPayload, Review.class));
+        ResponseEntity response = reviewService.addReview(reviewInvalidPayload);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - done");
+     }
 
     @Test
     void contextLoads() {

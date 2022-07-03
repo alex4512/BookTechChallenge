@@ -35,7 +35,7 @@ the screenshot.
 ```
 
 
-
+#TODO - 404 doesn't utilize the exception handler
 
 2. Part 2: Reviewing a book
 For this part of the exercise, you will have to create an endpoint that we can use to rate and review a
@@ -50,7 +50,12 @@ request payload are needed in order to keep the database safe and clean!
 
 
 note: as it is returned from part 1 - lookup exists first
-    
+  1) exists
+   1) validate payload correct
+   2) insert
+
+
+
 
 
 3. Part 3: Getting details of a specific book
