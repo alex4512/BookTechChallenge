@@ -28,5 +28,4 @@ import org.springframework.web.client.RestTemplate;
 		return "UP";
 	}
 
-
 }

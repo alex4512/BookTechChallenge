@@ -35,8 +35,6 @@ the screenshot.
 ```
 
 
-#TODO - 404 doesn't utilize the exception handler
-
 2. Part 2: Reviewing a book
 For this part of the exercise, you will have to create an endpoint that we can use to rate and review a
 specific book. The payload of the request will include the book id as it is returned from part 1, a rating
@@ -125,3 +123,12 @@ Analysis
 4 - Response payload on success #TODO
 
     
+
+@Requirements - 
+
+maven
+java 11
+an internet connection
+
+~ Useful links
+https://inloop.github.io/sqlite-viewer/

@@ -25,18 +25,15 @@ public class ReviewServiceImpl implements ReviewService{
     @Autowired
     ReviewRepository reviewRepository;
 
-    //        TODO use AOP for this (check before pointcut)
     @Override
     public ResponseEntity addReview(Review review) {
         ResponseEntity bookLookupResponse = bookService.findById(review.getBookId());
-        Book bookResponseEntity = (Book) bookLookupResponse.getBody();
-//        LOGGER.info(bookResponseEntity.toString());
         if(review.getRating() > 5 || review.getRating() < 1) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Rating value should be 1-5 (inclusive)");
         }
         Review reviewResult = reviewRepository.save(review);
         JSONObject jsonObject = new JSONObject(); // TODO - refactor, not a good practice
-        jsonObject.put("status", "created");
+        jsonObject.put("message", "created");
         jsonObject.put("reviewId", reviewResult.getReviewId());
         return new ResponseEntity<>(jsonObject, HttpStatus.CREATED);
     }
