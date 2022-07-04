@@ -33,7 +33,7 @@ The following resources are exposed via the API
 ### System Requirements
 
 - maven
-- java 11
+- java 8
 - an internet connection
 ---------
 The API generates the following HTTP Status Codes
