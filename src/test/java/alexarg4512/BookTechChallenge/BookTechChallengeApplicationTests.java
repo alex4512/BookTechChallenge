@@ -4,10 +4,14 @@ import alexarg4512.BookTechChallenge.v1.controller.BookController;
 import alexarg4512.BookTechChallenge.v1.entity.Book;
 import alexarg4512.BookTechChallenge.v1.entity.GutendexResponseEntity;
 import alexarg4512.BookTechChallenge.v1.entity.Review;
+import alexarg4512.BookTechChallenge.v1.repository.ReviewRepository;
 import alexarg4512.BookTechChallenge.v1.service.GutendexServiceClientImpl;
 import alexarg4512.BookTechChallenge.v1.service.ReviewService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +47,6 @@ class BookTechChallengeApplicationTests {
 
     @Autowired
     ReviewService reviewService;
-
 
     @Value("${gutendex.baseUrl}")
     private String baseUrl;
@@ -177,7 +178,7 @@ class BookTechChallengeApplicationTests {
         ResponseEntity response = reviewService.addReview(reviewBookNotFound);
 
         HttpClientErrorException e = assertThrows(HttpClientErrorException.class,
-                () -> restTemplate.postForEntity("http://localhost:8080/v1/reviews",
+                () -> restTemplate.postForEntity("http://localhost:8080/v1/review",
                                 reviewBookNotFound, Review.class));
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - done");
@@ -188,7 +189,7 @@ class BookTechChallengeApplicationTests {
         LOGGER.info("BookTechChallengeApplicationTests:testAddReviewForBookThatDoesNotexist  - start");
 
         HttpClientErrorException e = assertThrows(HttpClientErrorException.class,
-                () -> restTemplate.postForEntity("http://localhost:8080/v1/reviews",
+                () -> restTemplate.postForEntity("http://localhost:8080/v1/review",
                                 reviewInvalidPayload, Review.class));
         ResponseEntity response = reviewService.addReview(reviewInvalidPayload);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
